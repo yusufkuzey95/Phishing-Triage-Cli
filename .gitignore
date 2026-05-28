@@ -1,0 +1,18 @@
+# --- Secrets: NEVER commit real API keys ---
+.env
+
+# --- Python virtual environment (rebuild from requirements.txt instead) ---
+.venv/
+venv/
+
+# --- Python generated/cache files ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
