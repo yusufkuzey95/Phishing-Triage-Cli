@@ -19,8 +19,8 @@ Built as a learning project to demonstrate practical SOC analyst workflows.
 
 🚧 In active development. Progress by milestone:
 
-- [ ] M0 — Project scaffolding & hygiene
-- [ ] M1 — Parse a `.eml` file
+- [x] M0 — Project scaffolding & hygiene
+- [x] M1 — Parse a `.eml` file
 - [ ] M2 — Extract IOCs (URLs + IPs)
 - [ ] M3 — Enrich IOCs via VirusTotal + AbuseIPDB
 - [ ] M4 — Triage report & scoring
