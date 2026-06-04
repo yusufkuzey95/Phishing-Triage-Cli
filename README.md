@@ -22,7 +22,7 @@ Built as a learning project to demonstrate practical SOC analyst workflows.
 - [x] M0 — Project scaffolding & hygiene
 - [x] M1 — Parse a `.eml` file
 - [x] M2 — Extract IOCs (URLs + IPs)
-- [ ] M3 — Enrich IOCs via VirusTotal + AbuseIPDB
+- [x] M3 — Enrich IOCs via VirusTotal + AbuseIPDB
 - [ ] M4 — Triage report & scoring
 - [ ] M5 — Polish (CLI flags, tests, docs)
 
