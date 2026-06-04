@@ -17,14 +17,14 @@ Built as a learning project to demonstrate practical SOC analyst workflows.
 
 ## Status
 
-🚧 In active development. Progress by milestone:
+✅ Feature-complete. Milestones:
 
 - [x] M0 — Project scaffolding & hygiene
 - [x] M1 — Parse a `.eml` file
 - [x] M2 — Extract IOCs (URLs + IPs)
 - [x] M3 — Enrich IOCs via VirusTotal + AbuseIPDB
 - [x] M4 — Triage report & scoring
-- [ ] M5 — Polish (CLI flags, tests, docs)
+- [x] M5 — Polish (CLI flags, tests, docs)
 
 ## Setup
 
@@ -42,6 +42,79 @@ copy .env.example .env            # then edit .env and add your keys
 
 API keys are read from a local `.env` file (git-ignored). Get free keys from
 [VirusTotal](https://www.virustotal.com/) and [AbuseIPDB](https://www.abuseipdb.com/).
+
+## Usage
+
+```bash
+# Full triage (parse, extract IOCs, enrich via APIs, score)
+python -m phishing_triage samples/phishing_sample.eml
+
+# Fast offline run — skip the API calls (no keys required)
+python -m phishing_triage samples/phishing_sample.eml --no-enrich
+
+# Machine-readable JSON output (for automation/piping)
+python -m phishing_triage samples/phishing_sample.eml --json
+
+# Help
+python -m phishing_triage --help
+```
+
+### Example output
+
+```
+================================================================
+ PHISHING TRIAGE REPORT
+================================================================
+File   : samples/phishing_sample.eml
+From   : PayPal Security <security@paypa1-alerts.com>
+Subject: Your account has been limited - action required
+
+VERDICT: High phishing likelihood  (score 13)
+
+Reasoning:
+   [+2] SPF check failed (sending server not authorized for the domain)
+   [+1] DKIM not valid (dkim=none)
+   [+3] DMARC failed (message fails the domain owner's anti-spoofing policy)
+   [+2] From domain (paypa1-alerts.com) does not match Return-Path domain (sketchy-mailer.ru)
+   [+2] Reply-To domain (account-verify-help.com) differs from From domain (paypa1-alerts.com)
+   [+3] IP 185.220.101.45 has high AbuseIPDB score (100, 116 reports)
+
+Indicators of compromise (defanged):
+   URL: hxxp://paypa1-alerts[.]com/verify?id=8842
+   URL: hxxps://secure-paypa1[.]account-verify-help[.]com/login
+   IP : 203[.]0[.]113[.]77
+   IP : 185[.]220[.]101[.]45
+
+Recommended actions:
+   - Do NOT click any links or open attachments.
+   - Quarantine/delete the email from all recipient mailboxes.
+   - Block the malicious domains and IPs at the mail gateway/firewall.
+   - Search mail logs for other recipients of the same campaign.
+   - Escalate to the incident-response process.
+```
+
+## How scoring works
+
+Each detector contributes weighted `(points, reason)` signals; the total maps to a verdict.
+No single signal decides — the verdict is the **weight of evidence**, mirroring how an analyst
+reasons. A *clean* reputation result never lowers the score, because a brand-new phishing URL
+is simply uncatalogued ("zero-day"), not proven safe.
+
+| Signal source | Examples |
+|---|---|
+| Email authentication | SPF / DKIM / DMARC failures |
+| Domain alignment | `From` vs `Return-Path` vs `Reply-To` mismatches |
+| IOC reputation | high AbuseIPDB score, VirusTotal-flagged URLs |
+
+Verdict thresholds: **High** ≥ 6, **Medium** ≥ 3, else **Low**.
+
+## Testing
+
+```bash
+python -m pytest
+```
+
+The suite runs fully offline — network calls are mocked, so no API keys are needed to test.
 
 ## Tech
 
