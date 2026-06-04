@@ -7,6 +7,7 @@ from pathlib import Path
 
 from phishing_triage.parser import (
     load_email,
+    parse_bytes,
     get_sender,
     get_subject,
     get_key_headers,
@@ -21,6 +22,14 @@ SAMPLE = Path(__file__).resolve().parent.parent / "samples" / "phishing_sample.e
 def test_sender_is_extracted():
     msg = load_email(SAMPLE)
     assert get_sender(msg) == "PayPal Security <security@paypa1-alerts.com>"
+
+
+def test_parse_bytes_matches_load_email():
+    # Parsing the same email from raw bytes (web form path) yields the same data.
+    data = SAMPLE.read_bytes()
+    msg = parse_bytes(data)
+    assert get_sender(msg) == "PayPal Security <security@paypa1-alerts.com>"
+    assert get_subject(msg) == "Your account has been limited - action required"
 
 
 def test_subject_is_extracted():

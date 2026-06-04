@@ -4,3 +4,4 @@
 requests        # HTTP calls to the VirusTotal and AbuseIPDB APIs (M3)
 python-dotenv   # loads API keys from the .env file at runtime (M3)
 pytest          # test runner (we add tests from M1 onward)
+flask           # optional web UI (app.py)

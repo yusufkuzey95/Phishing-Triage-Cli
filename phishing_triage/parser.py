@@ -21,6 +21,15 @@ def load_email(path):
         return BytesParser(policy=policy.default).parse(f)
 
 
+def parse_bytes(data):
+    """Parse an email from raw bytes (e.g. text submitted via a web form).
+
+    Same parser and policy as load_email, just from an in-memory bytes object
+    instead of a file on disk.
+    """
+    return BytesParser(policy=policy.default).parsebytes(data)
+
+
 def get_sender(msg):
     """Return the raw From header (who the email *claims* to be from)."""
     return msg["From"]

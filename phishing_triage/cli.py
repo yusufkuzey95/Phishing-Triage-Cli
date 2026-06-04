@@ -15,9 +15,11 @@ from phishing_triage.enrichment import enrich_iocs
 from phishing_triage.triage import assess
 
 
-def run_triage(eml_path, enrich=True):
-    """Run the full pipeline on one .eml file and return a report dict."""
-    msg = load_email(eml_path)
+def build_report(msg, source="(email)", enrich=True):
+    """Build the triage report dict from an already-parsed email message.
+
+    Shared core used by both the CLI (file input) and the web UI (pasted text).
+    """
     headers = get_key_headers(msg)
     iocs = extract_iocs(msg)
     # When enrichment is disabled we pass empty results, so reputation signals
@@ -26,13 +28,19 @@ def run_triage(eml_path, enrich=True):
     assessment = assess(headers, enriched)
 
     return {
-        "file": str(eml_path),
+        "file": source,
         "sender": get_sender(msg),
         "subject": get_subject(msg),
         "iocs": iocs,
         "enriched": enriched,
         "assessment": assessment,
     }
+
+
+def run_triage(eml_path, enrich=True):
+    """Run the full pipeline on one .eml file and return a report dict."""
+    msg = load_email(eml_path)
+    return build_report(msg, source=str(eml_path), enrich=enrich)
 
 
 def format_text(report):

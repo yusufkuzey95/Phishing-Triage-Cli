@@ -25,6 +25,7 @@ Built as a learning project to demonstrate practical SOC analyst workflows.
 - [x] M3 — Enrich IOCs via VirusTotal + AbuseIPDB
 - [x] M4 — Triage report & scoring
 - [x] M5 — Polish (CLI flags, tests, docs)
+- [x] M6 — Optional web UI (Flask)
 
 ## Setup
 
@@ -93,6 +94,25 @@ Recommended actions:
    - Escalate to the incident-response process.
 ```
 
+## Web UI (optional)
+
+A lightweight Flask front-end is included for a quick visual demo. It is a thin
+layer over the **same engine** the CLI uses — it parses the pasted email and calls
+the identical `build_report()` function, so there is no duplicated logic.
+
+```bash
+pip install flask          # only needed for the web UI
+python app.py              # then open http://127.0.0.1:5000
+```
+
+Paste an email's **raw source** (e.g. Gmail → *Show original*) and click Analyze.
+Visit `http://127.0.0.1:5000/?demo=1` to see the bundled sample report immediately.
+
+![Phishing Triage web UI](docs/screenshot.png)
+
+> Note: this runs Flask's development server and is intended for **local demo use**,
+> not production. The CLI is the primary interface.
+
 ## How scoring works
 
 Each detector contributes weighted `(points, reason)` signals; the total maps to a verdict.
@@ -118,4 +138,4 @@ The suite runs fully offline — network calls are mocked, so no API keys are ne
 
 ## Tech
 
-Python 3.13 · stdlib `email` parser · `requests` · `python-dotenv` · `pytest`
+Python 3.13 · stdlib `email` parser · `requests` · `python-dotenv` · `pytest` · `flask` (optional web UI)
