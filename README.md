@@ -66,6 +66,8 @@ python -m phishing_triage --help
 
 ### Example output
 
+![Phishing Triage CLI — terminal output](docs/terminal.png)
+
 ```
 ================================================================
  PHISHING TRIAGE REPORT
