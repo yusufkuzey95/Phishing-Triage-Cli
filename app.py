@@ -39,17 +39,21 @@ PAGE = """
             --violet: #a78bfa; --ink: #e6f2f7;
             --panel: rgba(16,24,46,.62); --line: rgba(120,170,255,.18);
             color-scheme: dark; }
-    /* dark root background prevents a white flash during the page reload;
-       it matches the gradient's edge colour so there is no seam at the bottom */
+    /* The gradient lives on the ROOT element so it fills the entire canvas,
+       including behind the scrollbar gutter — otherwise a body background gets
+       clipped there and leaves a seam strip down the right edge. The dark base
+       colour also prevents a white flash during page reloads. */
     html, body { overflow-x: hidden; }
-    html { background: #070b1c; }
+    html {
+      background: radial-gradient(circle at 50% -10%, #11193a, #070b1c) no-repeat fixed;
+      background-color: #070b1c;
+    }
     * { box-sizing: border-box; }
     body {
       font-family: 'Inter','Segoe UI',system-ui,sans-serif;
       color: var(--ink); margin: 0; min-height: 100vh; padding: 2.6rem 1rem;
-      /* no hard colour stop, so the gradient blends smoothly to the corners */
-      background: radial-gradient(circle at 50% -10%, #11193a, #070b1c);
-      background-attachment: fixed;
+      /* transparent so the root gradient shows through with no seam */
+      background: transparent;
     }
     /* Starfield Drift: two parallax star layers slowly rising */
     body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
