@@ -26,6 +26,7 @@ Built as a learning project to demonstrate practical SOC analyst workflows.
 - [x] M4 — Triage report & scoring
 - [x] M5 — Polish (CLI flags, tests, docs)
 - [x] M6 — Optional web UI (Flask)
+- [x] M7 — Optional AI summary (Claude API)
 
 ## Setup
 
@@ -55,6 +56,9 @@ python -m phishing_triage samples/phishing_sample.eml --no-enrich
 
 # Machine-readable JSON output (for automation/piping)
 python -m phishing_triage samples/phishing_sample.eml --json
+
+# Add a plain-English AI summary (optional; needs ANTHROPIC_API_KEY)
+python -m phishing_triage samples/phishing_sample.eml --ai-summary
 
 # Help
 python -m phishing_triage --help
@@ -128,6 +132,15 @@ is simply uncatalogued ("zero-day"), not proven safe.
 
 Verdict thresholds: **High** ≥ 6, **Medium** ≥ 3, else **Low**.
 
+## AI summary (optional)
+
+With `--ai-summary` (and an `ANTHROPIC_API_KEY`), the tool calls the Claude API to
+turn the report into a 2–4 sentence plain-English summary for a ticket. The LLM
+**augments, it does not decide** — the deterministic weighted score remains the
+source of truth, so the verdict stays auditable. To limit prompt-injection risk, the
+model is given the *structured findings* (not the raw email) and told to treat that
+content as data, not instructions. Without a key, the tool runs exactly as before.
+
 ## Testing
 
 ```bash
@@ -138,7 +151,7 @@ The suite runs fully offline — network calls are mocked, so no API keys are ne
 
 ## Tech
 
-Python 3.13 · stdlib `email` parser · `requests` · `python-dotenv` · `pytest` · `flask` (optional web UI)
+Python 3.13 · stdlib `email` parser · `requests` · `python-dotenv` · `pytest` · `flask` (optional web UI) · `anthropic` (optional AI summary)
 
 ## License
 

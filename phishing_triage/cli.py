@@ -13,6 +13,7 @@ from phishing_triage.parser import load_email, get_sender, get_subject, get_key_
 from phishing_triage.iocs import extract_iocs, defang
 from phishing_triage.enrichment import enrich_iocs
 from phishing_triage.triage import assess
+from phishing_triage.summarize import generate_summary
 
 
 def build_report(msg, source="(email)", enrich=True):
@@ -99,6 +100,11 @@ def build_parser():
         action="store_true",
         help="output the report as JSON instead of formatted text",
     )
+    parser.add_argument(
+        "--ai-summary",
+        action="store_true",
+        help="add a plain-English AI summary via the Claude API (needs ANTHROPIC_API_KEY)",
+    )
     return parser
 
 
@@ -111,8 +117,15 @@ def main(argv=None):
         print(f"error: file not found: {args.eml_path}", file=sys.stderr)
         return 2
 
+    summary = generate_summary(report) if args.ai_summary else None
+
     if args.json:
+        if summary is not None:
+            report["ai_summary"] = summary
         print(json.dumps(report, indent=2))
     else:
         print(format_text(report))
+        if summary is not None:
+            print("\nAI summary:")
+            print(f"   {summary}")
     return 0

@@ -23,3 +23,8 @@ def get_virustotal_key():
 def get_abuseipdb_key():
     """Return the AbuseIPDB API key from the environment, or None if unset."""
     return os.getenv("ABUSEIPDB_API_KEY") or None
+
+
+def get_anthropic_key():
+    """Return the Anthropic (Claude) API key from the environment, or None."""
+    return os.getenv("ANTHROPIC_API_KEY") or None
