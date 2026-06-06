@@ -139,3 +139,7 @@ The suite runs fully offline — network calls are mocked, so no API keys are ne
 ## Tech
 
 Python 3.13 · stdlib `email` parser · `requests` · `python-dotenv` · `pytest` · `flask` (optional web UI)
+
+## License
+
+Released under the [MIT License](LICENSE).
