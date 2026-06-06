@@ -4,8 +4,6 @@ Uses Flask's built-in test client, so no real server or network is needed.
 All triage runs offline (enrichment disabled) for determinism.
 """
 
-import re
-
 from app import app, SAMPLE_TEXT
 
 
@@ -14,30 +12,16 @@ def _client():
     return app.test_client()
 
 
-def _active_bg(html):
-    m = re.search(r'bgopt active[^>]*>([^<]+)<', html)
-    return m.group(1).strip() if m else None
-
-
 def test_home_renders_form():
     html = _client().get("/").get_data(as_text=True)
     assert "PHISH//TRIAGE" in html
     assert "<textarea" in html
 
 
-def test_default_background_is_starfield():
+def test_uses_starfield_background_and_no_switcher():
     html = _client().get("/").get_data(as_text=True)
-    assert "Starfield" in _active_bg(html)
-
-
-def test_invalid_background_falls_back_to_default():
-    html = _client().get("/?bg=99").get_data(as_text=True)
-    assert "Starfield" in _active_bg(html)
-
-
-def test_background_can_be_selected():
-    html = _client().get("/?bg=4").get_data(as_text=True)
-    assert "Digital Rain" in _active_bg(html)
+    assert "stars-far" in html        # Starfield background is baked in
+    assert "bgbar" not in html        # the background switcher is gone
 
 
 def test_demo_mode_renders_sample_report():

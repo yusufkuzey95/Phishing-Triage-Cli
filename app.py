@@ -26,82 +26,6 @@ SAMPLE_TEXT = SAMPLE.read_text(encoding="utf-8") if SAMPLE.exists() else ""
 
 VERDICT_COLORS = {"High": "#ff2e63", "Medium": "#ffb302", "Low": "#39ff14"}
 
-# --- selectable background styles ---------------------------------------
-# Each entry only styles the page background (body + ::before/::after); the
-# rest of the UI CSS is shared. Swap with ?bg=<key>.
-BACKGROUNDS = {
-    "1": {"name": "Aurora Orbit", "css": """
-      body { background: linear-gradient(135deg,#0b1228,#121a36 50%,#0c1730); }
-      body::before { content:""; position:fixed; top:50%; left:50%; width:200vmax; height:200vmax;
-        pointer-events:none; z-index:0; filter: blur(48px);
-        background:
-          radial-gradient(circle at 32% 36%, rgba(34,211,238,.12), transparent 45%),
-          radial-gradient(circle at 70% 64%, rgba(167,139,250,.12), transparent 45%),
-          radial-gradient(circle at 56% 26%, rgba(52,211,153,.09), transparent 45%);
-        animation: bgA-orbit 70s linear infinite; }
-      @keyframes bgA-orbit { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
-      body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-        background-image: linear-gradient(rgba(130,180,255,.04) 1px,transparent 1px),
-                          linear-gradient(90deg,rgba(130,180,255,.04) 1px,transparent 1px);
-        background-size:46px 46px; animation: bgA-grid 7s linear infinite; }
-      @keyframes bgA-grid { to{background-position:46px 46px} }
-    """},
-    "2": {"name": "Starfield Drift", "css": """
-      body { background: radial-gradient(circle at 50% 0%, #0e1733, #070b1c 75%); }
-      body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-        background-image:
-          radial-gradient(1px 1px at 20px 30px, rgba(180,220,255,.5), transparent),
-          radial-gradient(1px 1px at 80px 120px, rgba(170,210,255,.4), transparent),
-          radial-gradient(1.5px 1.5px at 150px 70px, rgba(160,200,255,.5), transparent),
-          radial-gradient(1px 1px at 210px 160px, rgba(200,225,255,.4), transparent);
-        background-size:240px 240px; animation: bgB-far 90s linear infinite; }
-      @keyframes bgB-far { to{background-position:0 -2400px} }
-      body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-        background-image:
-          radial-gradient(1.5px 1.5px at 40px 50px, rgba(120,230,255,.55), transparent),
-          radial-gradient(2px 2px at 160px 150px, rgba(150,255,230,.45), transparent);
-        background-size:320px 320px; animation: bgB-near 50s linear infinite; }
-      @keyframes bgB-near { to{background-position:0 -3200px} }
-    """},
-    "3": {"name": "Plasma Flow", "css": """
-      body { background: linear-gradient(120deg,#0c1430,#16203f,#123247,#1a1740,#0c1430);
-        background-size:300% 300%; animation: bgC-plasma 22s ease-in-out infinite; }
-      @keyframes bgC-plasma { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-      body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-        background-image: linear-gradient(rgba(130,180,255,.03) 1px,transparent 1px),
-                          linear-gradient(90deg,rgba(130,180,255,.03) 1px,transparent 1px);
-        background-size:46px 46px; }
-    """},
-    "4": {"name": "Digital Rain", "css": """
-      body { background:#04100b; }
-      body::before { content:""; position:fixed; left:0; right:0; top:-100%; height:200%;
-        pointer-events:none; z-index:0;
-        background-image: repeating-linear-gradient(0deg, transparent 0 120px,
-          rgba(0,255,150,.13) 120px 150px, transparent 150px 320px);
-        background-size:26px 100%; animation: bgD-a 4.5s linear infinite; }
-      @keyframes bgD-a { to{transform:translateY(50%)} }
-      body::after { content:""; position:fixed; left:0; right:0; top:-100%; height:200%;
-        pointer-events:none; z-index:0;
-        background-image: repeating-linear-gradient(0deg, transparent 0 90px,
-          rgba(0,230,170,.09) 90px 110px, transparent 110px 360px);
-        background-size:42px 100%; animation: bgD-b 7s linear infinite; }
-      @keyframes bgD-b { to{transform:translateY(50%)} }
-    """},
-    "5": {"name": "Radar Sweep", "css": """
-      body { background: radial-gradient(circle at 50% 50%, #0a1730, #060b1c 75%); }
-      body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-        background-image:
-          linear-gradient(rgba(80,160,255,.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(80,160,255,.04) 1px, transparent 1px);
-        background-size:48px 48px; }
-      body::after { content:""; position:fixed; top:50%; left:50%; width:220vmax; height:220vmax;
-        transform: translate(-50%,-50%); pointer-events:none; z-index:0;
-        background: conic-gradient(from 0deg, rgba(34,211,238,.16), rgba(34,211,238,.03) 30deg, transparent 60deg 360deg);
-        animation: bgE-radar 9s linear infinite; }
-      @keyframes bgE-radar { to{transform:translate(-50%,-50%) rotate(360deg)} }
-    """},
-}
-
 PAGE = """
 <!doctype html>
 <html lang="en">
@@ -122,7 +46,23 @@ PAGE = """
     body {
       font-family: 'Inter','Segoe UI',system-ui,sans-serif;
       color: var(--ink); margin: 0; min-height: 100vh; padding: 2.6rem 1rem;
+      background: radial-gradient(circle at 50% 0%, #0e1733, #070b1c 75%);
     }
+    /* Starfield Drift: two parallax star layers slowly rising */
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:
+        radial-gradient(1px 1px at 20px 30px, rgba(180,220,255,.5), transparent),
+        radial-gradient(1px 1px at 80px 120px, rgba(170,210,255,.4), transparent),
+        radial-gradient(1.5px 1.5px at 150px 70px, rgba(160,200,255,.5), transparent),
+        radial-gradient(1px 1px at 210px 160px, rgba(200,225,255,.4), transparent);
+      background-size:240px 240px; animation: stars-far 90s linear infinite; }
+    @keyframes stars-far { to { background-position: 0 -2400px; } }
+    body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:
+        radial-gradient(1.5px 1.5px at 40px 50px, rgba(120,230,255,.55), transparent),
+        radial-gradient(2px 2px at 160px 150px, rgba(150,255,230,.45), transparent);
+      background-size:320px 320px; animation: stars-near 50s linear infinite; }
+    @keyframes stars-near { to { background-position: 0 -3200px; } }
     @media (prefers-reduced-motion: reduce) {
       body, body::before, body::after { animation: none !important; }
     }
@@ -152,16 +92,6 @@ PAGE = """
     .sub { color: #8aa6c7; font-size: .85rem; letter-spacing: .3px; margin: 1.1rem 0 .8rem; }
     .blink { animation: blink 1.1s steps(2) infinite; color: var(--cyan); }
     @keyframes blink { 50% { opacity: 0; } }
-
-    /* background switcher */
-    .bgbar { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0 0 1.3rem; }
-    .bglabel { font-size: .6rem; letter-spacing: 2px; color: #6f8bb0; margin-right: .3rem; }
-    .bgopt { font-size: .72rem; color: #9fbdd8; text-decoration: none; padding: .28rem .65rem;
-             border: 1px solid var(--line); border-radius: 999px; background: rgba(10,18,34,.5);
-             transition: all .15s; }
-    .bgopt:hover { border-color: var(--cyan); color: #dff6ff; }
-    .bgopt.active { background: linear-gradient(135deg,#7ee8fa,#34d399); color: #07101f;
-                    border-color: transparent; font-weight: 600; }
 
     .panel { background: var(--panel); border: 1px solid var(--line);
              border-radius: 14px; padding: 1.2rem 1.3rem; backdrop-filter: blur(10px);
@@ -212,7 +142,6 @@ PAGE = """
     .empty { color: #6fb9c7; font-size: .85rem; }
     .foot { margin-top: 1.6rem; text-align: center; color: #466; font-size: .7rem; letter-spacing: 2px; }
   </style>
-  <style>{{ bg_css|safe }}</style>
 </head>
 <body>
   <div class="wrap">
@@ -225,15 +154,7 @@ PAGE = """
     </div>
     <p class="sub">Paste a raw .eml payload and run threat analysis<span class="blink"> _</span></p>
 
-    <div class="bgbar">
-      <span class="bglabel">BACKGROUND</span>
-      {% for key, b in backgrounds.items() %}
-        <a class="bgopt {% if key == bg %}active{% endif %}" href="/?bg={{ key }}">{{ key }} · {{ b.name }}</a>
-      {% endfor %}
-    </div>
-
     <form method="post">
-      <input type="hidden" name="bg" value="{{ bg }}">
       <div class="panel">
         <label class="fld">&gt; paste raw email source</label>
         <textarea name="eml" spellcheck="false">{{ eml_text }}</textarea>
@@ -296,11 +217,6 @@ def index():
     eml_text = SAMPLE_TEXT
     enrich = True
 
-    # Background choice comes from either the query string (?bg=) or the form.
-    bg = request.values.get("bg", "2")
-    if bg not in BACKGROUNDS:
-        bg = "2"
-
     if request.method == "POST":
         eml_text = request.form.get("eml", "")
         enrich = request.form.get("enrich") is not None
@@ -319,7 +235,6 @@ def index():
     return render_template_string(
         PAGE, report=report, eml_text=eml_text, enrich=enrich,
         color=color, defang=defang,
-        backgrounds=BACKGROUNDS, bg=bg, bg_css=BACKGROUNDS[bg]["css"],
     )
 
 
