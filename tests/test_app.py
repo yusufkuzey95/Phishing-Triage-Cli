@@ -4,6 +4,7 @@ Uses Flask's built-in test client, so no real server or network is needed.
 All triage runs offline (enrichment disabled) for determinism.
 """
 
+import app as webapp
 from app import app, SAMPLE_TEXT
 
 
@@ -36,3 +37,16 @@ def test_post_pasted_email_is_analyzed():
     html = resp.get_data(as_text=True)
     assert resp.status_code == 200
     assert "High" in html
+
+
+def test_ai_summary_shown_when_requested(monkeypatch):
+    # Stub the Claude call so the web AI path is tested offline.
+    monkeypatch.setattr(webapp, "generate_summary", lambda report: "STUB SUMMARY TEXT")
+    resp = _client().post("/", data={"eml": SAMPLE_TEXT, "ai_summary": "on"})
+    html = resp.get_data(as_text=True)
+    assert "STUB SUMMARY TEXT" in html
+
+
+def test_no_ai_summary_by_default():
+    html = _client().post("/", data={"eml": SAMPLE_TEXT}).get_data(as_text=True)
+    assert 'class="aisum"' not in html

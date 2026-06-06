@@ -14,8 +14,9 @@ import anthropic
 
 from phishing_triage.config import get_anthropic_key
 
-# Current flagship model. Swap to "claude-haiku-4-5" if you want it cheaper/faster.
-MODEL = "claude-opus-4-8"
+# Haiku is fast and cheap and plenty for a short summary. Swap to "claude-opus-4-8"
+# for the flagship model if you want richer prose.
+MODEL = "claude-haiku-4-5"
 REQUEST_TIMEOUT = 30  # seconds
 
 SYSTEM_PROMPT = (

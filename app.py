@@ -17,6 +17,7 @@ from flask import Flask, request, render_template_string
 from phishing_triage.parser import parse_bytes
 from phishing_triage.iocs import defang
 from phishing_triage.cli import build_report
+from phishing_triage.summarize import generate_summary
 
 app = Flask(__name__)
 
@@ -25,6 +26,9 @@ SAMPLE = Path(__file__).resolve().parent / "samples" / "phishing_sample.eml"
 SAMPLE_TEXT = SAMPLE.read_text(encoding="utf-8") if SAMPLE.exists() else ""
 
 VERDICT_COLORS = {"High": "#ff2e63", "Medium": "#ffb302", "Low": "#39ff14"}
+
+# Cache the bundled-demo AI summary so repeated /?demo views don't re-call the API.
+_DEMO_SUMMARY_CACHE = {}
 
 PAGE = """
 <!doctype html>
@@ -147,6 +151,12 @@ PAGE = """
     .act { font-size: .86rem; color: #d4eef3; padding: .2rem 0 .2rem 1.1rem; position: relative; }
     .act::before { content: ">"; position: absolute; left: 0; color: var(--green); }
     .empty { color: #6fb9c7; font-size: .85rem; }
+    .aisum { font-size: .9rem; line-height: 1.6; color: #e6f2f7; margin: .3rem 0 0;
+             padding: .8rem 1rem; border-radius: 8px; border: 1px solid rgba(167,139,250,.35);
+             background: rgba(167,139,250,.08); }
+    .ai-tag { font-size: .58rem; font-weight: 700; letter-spacing: 1px; color: #07101f;
+              background: linear-gradient(135deg,#a78bfa,#7ee8fa); padding: .12rem .45rem;
+              border-radius: 4px; vertical-align: middle; margin-left: .4rem; }
     .foot { margin-top: 1.6rem; text-align: center; color: #466; font-size: .7rem; letter-spacing: 2px; }
   </style>
 </head>
@@ -171,8 +181,12 @@ PAGE = """
           &nbsp;&bull; <b>Outlook (web):</b> open the email → &#8942; → <b>View message source</b> → select all → paste here.<br>
           &nbsp;&bull; <b>Apple Mail:</b> select the email → menu <b>View → Message → Raw Source</b> → copy → paste here.</p>
         <div class="controls">
-          <span class="chk"><label><input type="checkbox" name="enrich" {% if enrich %}checked{% endif %}>
-            enrich IOCs via VirusTotal / AbuseIPDB &nbsp;[live · uses API quota]</label></span>
+          <span class="chk">
+            <label><input type="checkbox" name="enrich" {% if enrich %}checked{% endif %}>
+              enrich IOCs via VirusTotal / AbuseIPDB</label><br>
+            <label><input type="checkbox" name="ai_summary" {% if ai_summary %}checked{% endif %}>
+              AI summary (Claude)</label>
+          </span>
           <button type="submit">▶ Analyze</button>
         </div>
       </div>
@@ -208,6 +222,11 @@ PAGE = """
 
       <h3>Recommended actions</h3>
       {% for action in report.assessment.recommended_actions %}<div class="act">{{ action }}</div>{% endfor %}
+
+      {% if summary %}
+      <h3>AI summary <span class="ai-tag">Claude</span></h3>
+      <p class="aisum">{{ summary }}</p>
+      {% endif %}
     </div>
     {% endif %}
 
@@ -221,27 +240,43 @@ PAGE = """
 @app.route("/", methods=["GET", "POST"])
 def index():
     report = None
+    summary = None
     eml_text = SAMPLE_TEXT
     enrich = True
+    ai_summary = False
 
     if request.method == "POST":
         eml_text = request.form.get("eml", "")
         enrich = request.form.get("enrich") is not None
+        ai_summary = request.form.get("ai_summary") is not None
         msg = parse_bytes(eml_text.encode("utf-8"))
         report = build_report(msg, source="(pasted email)", enrich=enrich)
     elif request.args.get("demo"):
         # Show the bundled sample report on a plain GET — handy for a quick look
-        # without pasting anything. Add &live=1 to run real enrichment too.
+        # without pasting anything. Add &live=1 to enrich, &ai=1 for the summary.
         enrich = request.args.get("live") is not None
+        ai_summary = request.args.get("ai") is not None
         msg = parse_bytes(SAMPLE_TEXT.encode("utf-8"))
         report = build_report(msg, source="samples/phishing_sample.eml", enrich=enrich)
+
+    if report and ai_summary:
+        # The /?demo report is fixed, so cache its summary instead of paying for a
+        # fresh Claude call on every view.
+        is_demo = request.args.get("demo") is not None
+        cache_key = (enrich,)
+        if is_demo and cache_key in _DEMO_SUMMARY_CACHE:
+            summary = _DEMO_SUMMARY_CACHE[cache_key]
+        else:
+            summary = generate_summary(report)
+            if is_demo:
+                _DEMO_SUMMARY_CACHE[cache_key] = summary
 
     color = VERDICT_COLORS.get(
         report["assessment"]["verdict"] if report else "", "#566573"
     )
     return render_template_string(
         PAGE, report=report, eml_text=eml_text, enrich=enrich,
-        color=color, defang=defang,
+        ai_summary=ai_summary, summary=summary, color=color, defang=defang,
     )
 
 
